@@ -3,14 +3,39 @@ from pathlib import Path
 import scrapy
 from urllib.parse import urljoin
 import os
+import pandas as pd
+from datetime import datetime
+"""
+This is a bot to run the web crawler to extract the governmental data in form of links
+To run this script:
 
-class QuotesSpider(scrapy.Spider):
+scrapy crawl link_extractor -a input_path=scraper_environment_project/data/csv/inputs_websites.csv
+
+IMPORTANT: It has to be run from scrapy-test1/scraper_environment_project OR if the scrapy.cfg file got moved around, wherever that file is
+
+The input_path leads to a CSV file that contains a "url" column with all the links that you want the bot to scrape
+
+"""
+
+
+class Scrapybot(scrapy.Spider):
     name = "link_extractor"  # Unique name to run the spider (e.g., scrapy crawl link_extractor)
 
-    # Starting URL(s) for the spider
-    start_urls = [
-        "https://www.environnement.gouv.qc.ca/lqe/autorisations/reafie/index.htm",
-    ]
+    # Constructor to initialize the Scrapybot class and take the input_websites Excel's "urls" column to convert into the array and list of websites it will scrape
+    def __init__(self, input_path= None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if input_path is None:
+            base_dir = Path(__file__).resolve().parent.parent
+            input_path = base_dir / "data" / "csv" / "inputs_websites.csv"
+        self.input_path = Path(input_path)
+        if not self.input_path.exists():
+            raise FileNotFoundError(f"Input CSV not found: {self.input_path}")
+        df = pd.read_csv(input_path)
+        if 'url' not in df.columns:
+            raise ValueError("Excel file must contain a 'url' column.")
+
+            # Set start_urls dynamically
+        self.start_urls = df['url'].dropna().tolist()
 
     def parse(self, response):
         base = response.url  # The base URL to resolve relative links
@@ -29,9 +54,10 @@ class QuotesSpider(scrapy.Spider):
 
         output_dir = os.path.join("scraper_environment_project", "data", "json")
         os.makedirs(output_dir, exist_ok=True)
-
+        domain = response.url.split("//")[-1].split("/")[-2].replace(".", "_")
+        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
         # Write to JSON file
-        output_path = os.path.join(output_dir, "links.json")
+        output_path = os.path.join(output_dir, f"{domain}_{timestamp}.json")
 
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump({
