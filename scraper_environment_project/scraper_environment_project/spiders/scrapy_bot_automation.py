@@ -48,6 +48,10 @@ class Scrapybot(scrapy.Spider):
 
             # Set start_urls dynamically
             self.start_urls = df['url'].dropna().tolist()
+            # Create a hashmap with name-url matching. Only initialized if name column exists
+            self.url_to_name = {}
+            if 'name' in df.columns:
+                self.url_to_name = dict(zip(df['url'], df['name']))
             logging.info(f"Initialized Scrapybot with {len(self.start_urls)} URLs from {self.input_path}")
 
         except Exception as e:
@@ -75,11 +79,17 @@ class Scrapybot(scrapy.Spider):
 
             output_dir = os.path.join("scraper_environment_project", "data", "json")
             os.makedirs(output_dir, exist_ok=True)
-            domain = response.url.split("//")[-1].split("/")[-2].replace(".", "_")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            # Write to JSON file
-            output_path = os.path.join(output_dir, f"{domain}_{timestamp}.json")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            name = self.url_to_name.get(response.url)
+
+            if name and isinstance(name, str) and name.strip():
+                filename = f"{name.strip().replace(' ', '_')}_{timestamp}.json"
+            else:
+                domain = response.url.split("//")[-1].split("/")[-2].replace(".", "_")
+                filename = f"{domain}_{timestamp}.json"
+
+            output_path = os.path.join(output_dir, filename)
 
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump({
@@ -89,6 +99,15 @@ class Scrapybot(scrapy.Spider):
                 }, f, ensure_ascii=False, indent=2)
 
             logging.info(f"Scraped and saved links for {response.url} to {output_path}")
+
+            # Save raw HTML using same name base
+            html_filename=filename.replace(".json",".html")
+            html_output_path = os.path.join(os.path.join("scraper_environment_project", "data", "html"), html_filename)
+            with open(html_output_path, "wb") as html_file:
+                html_file.write(response.body)
+
+            logging.info(f"Scraped and saved links for {response.url} to {output_path}")
+            logging.info(f"Saved raw HTML for {response.url} to {html_output_path}")
 
             # Yield the results as a dictionary (Scrapy will export this if using -o output.json)
             yield {
