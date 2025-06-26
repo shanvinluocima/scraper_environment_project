@@ -42,3 +42,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+"""
+To run:
+python scraper_environment_project/scraper_environment_project/utils/extract_pdf_link.py scraper_environment_project/scraper_environment_project/data/html/REAFIE_20250626_162923.html
+"""
