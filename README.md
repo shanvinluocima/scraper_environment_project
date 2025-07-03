@@ -15,6 +15,7 @@ scraper_environment_project/
 │   └── quotes_spider.py         # Scrapy spider that extracts and filters links
 ├── utils/
 │   ├── json_to_csv.py           # Converts and cleans extracted data
+│   └── extract_pdf_link.py      # Parse Légis Québec HTML pages for PDF link
 ├── data/
 │   ├── json/
 │   │   └── links.json           # Raw scraped output
@@ -84,6 +85,7 @@ scraper_environment_project/data/csv/links_cleaned.csv
 * `json_to_csv()`: Converts JSON output to a clean, flat CSV format
 * `compact_column()`: Moves non-blank values upward in a column
 * `full_json_to_cleaned_csv_workflow()`: Full data pipeline
+* `extract_pdf_link(html_file)`: Returns the PDF rendition link from a saved HTML page
 
 ---
 

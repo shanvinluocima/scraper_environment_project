@@ -8,11 +8,13 @@ import logging
 from datetime import datetime
 import difflib
 import re
+from bs4 import BeautifulSoup
+from pathlib import Path
 """
 This is a bot to run the web crawler to extract the governmental data in form of links
 To run this script:
 
-scrapy crawl link_extractor -a input_path=scraper_environment_project/data/csv_input/inputs_websites.csv
+scrapy crawl html_extractor -a input_path=scraper_environment_project/data/csv_input/inputs_websites.csv
 
 IMPORTANT: It has to be run from scrapy-test1/scraper_environment_project OR if the scrapy.cfg file got moved around, wherever that file is
 
@@ -26,6 +28,37 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+
+# def extract_llm_ready_text(response, css_selector="div.DefaultPageSequence.BodyPageSequence"):
+#     """
+#     Extracts and formats LLM-friendly text from a specific section of the page.
+#     Keeps heading structure and joins paragraphs cleanly.
+#
+#     Args:
+#         response (scrapy.http.Response): The Scrapy response object.
+#         css_selector (str): CSS selector targeting the content block.
+#
+#     Returns:
+#         str: Structured plain text with headings and paragraph breaks.
+#     """
+#     section = response.css(css_selector)
+#     result = []
+#     for elem in section.xpath("./"):
+#         tag = elem.root.tag.lower()
+#         if tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+#             heading_text = elem.xpath(".//text()").getall()
+#             heading_clean = " ".join(t.strip() for t in heading_text if t.strip())
+#             if heading_clean:
+#                 level = int(tag[1])
+#                 result.append(f"{'#' * level} {heading_clean}")
+#         else:
+#             para_text = elem.xpath(".//text()").getall()
+#             para_clean = " ".join(t.strip() for t in para_text if t.strip())
+#             if para_clean:
+#                 result.append(para_clean)
+#     return "\n\n".join(result)
+
 
 class HTML_scraper(scrapy.Spider):
     name = "html_extractor"  # Unique name to run the spider (e.g., scrapy crawl link_extractor)
@@ -166,7 +199,6 @@ class HTML_scraper(scrapy.Spider):
 
         except Exception as e:
             logging.error(f"Error in clean_out_old_same_site_html for {new_filepath}: {e}")
-
 
 
 

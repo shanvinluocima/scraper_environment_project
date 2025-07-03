@@ -1,4 +1,7 @@
-from scraper_environment_project.scraper_environment_project.utils import json_to_csv
+from scraper_environment_project.scraper_environment_project.strategies import REAFIE_extraction, RelevantContentStrategy
+from pathlib import Path
 
 if __name__ == '__main__':
-    json_to_csv.full_json_to_cleaned_csv_workflow()
+    strategy = REAFIE_extraction()
+    result = strategy.extract(Path("../data/html/REAFIE_20250703_134550.html"), Path("../knowledge_base_data/REAFIE.txt"))
+    print("Extracted content length:", len(result))
