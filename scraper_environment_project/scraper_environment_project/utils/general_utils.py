@@ -1,7 +1,9 @@
 import datetime
-import re
 import os
 import logging
+from pathlib import Path
+import re
+from typing import Optional
 
 def clean_out_old_same_site_html(self, new_filepath):
     """
@@ -66,3 +68,16 @@ def clean_out_old_same_site_html(self, new_filepath):
 
     except Exception as e:
         logging.error(f"Error in clean_out_old_same_site_html for {new_filepath}: {e}")
+
+
+def find_latest_file(folder: Path, prefix: str = "REAFIE_", extension: str = ".html") -> Optional[Path]:
+    """
+    Finds the most recent file matching the pattern PREFIX_YYYYMMDD_HHMMSS.ext
+    """
+    pattern = re.compile(rf"^{re.escape(prefix)}\d{{8}}_\d{{6}}{re.escape(extension)}$")
+    matching_files = [f for f in folder.iterdir() if f.is_file() and pattern.match(f.name)]
+
+    if not matching_files:
+        return None
+
+    return max(matching_files, key=lambda f: f.stat().st_mtime)
