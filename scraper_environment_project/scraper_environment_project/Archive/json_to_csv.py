@@ -74,12 +74,12 @@ def json_to_csv(input_json_path, output_csv_path):
 
 def full_json_to_cleaned_csv_workflow():
     """
-    Complete pipeline: Converts links.json → links.csv → links_cleaned.csv
+    Complete pipeline: Converts links.json → links.csv_output → links_cleaned.csv_output
     and compacts the 'Other Link' column in the final CSV.
     """
     input_json = '../data/json/links.json'
-    intermediate_csv = '../data/csv/links.csv'
-    cleaned_csv = '../data/csv/links_cleaned.csv'
+    intermediate_csv = '../data/csv_output/links.csv_output'
+    cleaned_csv = '../data/csv_output/links_cleaned.csv_output'
     target_column = 'Other Link'
 
     # Step 1: Convert JSON to intermediate CSV
